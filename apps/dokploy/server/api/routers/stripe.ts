@@ -5,7 +5,7 @@ import {
 	updateUser,
 } from "@dokploy/server";
 import { TRPCError } from "@trpc/server";
-import Stripe from "stripe";
+import type Stripe from "stripe";
 import { z } from "zod";
 import {
 	type BillingTier,
@@ -35,7 +35,8 @@ export const stripeRouter = createTRPCRouter({
 		const owner = await findUserById(ctx.user.ownerId);
 		if (!owner?.stripeCustomerId) return null;
 
-		const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+		const { default: StripeClient } = await import("stripe");
+		const stripe = new StripeClient(process.env.STRIPE_SECRET_KEY!, {
 			apiVersion: "2024-09-30.acacia",
 		});
 		const subscriptions = await stripe.subscriptions.list({
@@ -75,7 +76,8 @@ export const stripeRouter = createTRPCRouter({
 		const user = await findUserById(ctx.user.ownerId);
 		const stripeCustomerId = user.stripeCustomerId;
 
-		const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+		const { default: StripeClient } = await import("stripe");
+		const stripe = new StripeClient(process.env.STRIPE_SECRET_KEY!, {
 			apiVersion: "2024-09-30.acacia",
 		});
 
@@ -176,7 +178,8 @@ export const stripeRouter = createTRPCRouter({
 				}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+			const { default: StripeClient } = await import("stripe");
+			const stripe = new StripeClient(process.env.STRIPE_SECRET_KEY!, {
 				apiVersion: "2024-09-30.acacia",
 			});
 
@@ -234,7 +237,8 @@ export const stripeRouter = createTRPCRouter({
 		}
 		const stripeCustomerId = owner.stripeCustomerId;
 
-		const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+		const { default: StripeClient } = await import("stripe");
+		const stripe = new StripeClient(process.env.STRIPE_SECRET_KEY!, {
 			apiVersion: "2024-09-30.acacia",
 		});
 
@@ -266,7 +270,8 @@ export const stripeRouter = createTRPCRouter({
 				}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+			const { default: StripeClient } = await import("stripe");
+			const stripe = new StripeClient(process.env.STRIPE_SECRET_KEY!, {
 				apiVersion: "2024-09-30.acacia",
 			});
 			const owner = await findUserById(ctx.user.ownerId);
@@ -361,7 +366,8 @@ export const stripeRouter = createTRPCRouter({
 			return [];
 		}
 
-		const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+		const { default: StripeClient } = await import("stripe");
+		const stripe = new StripeClient(process.env.STRIPE_SECRET_KEY!, {
 			apiVersion: "2024-09-30.acacia",
 		});
 

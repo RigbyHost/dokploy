@@ -1,12 +1,3 @@
-import { createAnthropic } from "@ai-sdk/anthropic";
-import { createAzure } from "@ai-sdk/azure";
-import { createCohere } from "@ai-sdk/cohere";
-import { createDeepInfra } from "@ai-sdk/deepinfra";
-import { createMistral } from "@ai-sdk/mistral";
-import { createOpenAI } from "@ai-sdk/openai";
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import { createOllama } from "ai-sdk-ollama";
-
 export function getProviderName(apiUrl: string) {
 	if (apiUrl.includes("api.openai.com")) return "openai";
 	if (apiUrl.includes("azure.com")) return "azure";
@@ -23,19 +14,22 @@ export function getProviderName(apiUrl: string) {
 	return "custom";
 }
 
-export function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
+export async function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
 	const providerName = getProviderName(config.apiUrl);
 
 	switch (providerName) {
-		case "openai":
+		case "openai": {
+			const { createOpenAI } = await import("@ai-sdk/openai");
 			return createOpenAI({
 				apiKey: config.apiKey,
 				baseURL: config.apiUrl,
 			});
-		case "azure":
+		}
+		case "azure": {
 			// Azure OpenAI-compatible endpoints already include /v1 in the path.
 			// Using createAzure with such URLs causes a doubled /v1//v1/ suffix.
 			if (config.apiUrl.includes("/v1")) {
+				const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
 				return createOpenAICompatible({
 					name: "azure",
 					baseURL: config.apiUrl,
@@ -45,21 +39,28 @@ export function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
 					},
 				});
 			}
+			const { createAzure } = await import("@ai-sdk/azure");
 			return createAzure({
 				apiKey: config.apiKey,
 				baseURL: config.apiUrl,
 			});
-		case "anthropic":
+		}
+		case "anthropic": {
+			const { createAnthropic } = await import("@ai-sdk/anthropic");
 			return createAnthropic({
 				apiKey: config.apiKey,
 				baseURL: config.apiUrl,
 			});
-		case "cohere":
+		}
+		case "cohere": {
+			const { createCohere } = await import("@ai-sdk/cohere");
 			return createCohere({
 				baseURL: config.apiUrl,
 				apiKey: config.apiKey,
 			});
-		case "perplexity":
+		}
+		case "perplexity": {
+			const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
 			return createOpenAICompatible({
 				name: "perplexity",
 				baseURL: config.apiUrl,
@@ -67,22 +68,30 @@ export function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
 					Authorization: `Bearer ${config.apiKey}`,
 				},
 			});
-		case "mistral":
+		}
+		case "mistral": {
+			const { createMistral } = await import("@ai-sdk/mistral");
 			return createMistral({
 				baseURL: config.apiUrl,
 				apiKey: config.apiKey,
 			});
-		case "ollama":
+		}
+		case "ollama": {
+			const { createOllama } = await import("ai-sdk-ollama");
 			return createOllama({
 				// optional settings, e.g.
 				baseURL: config.apiUrl,
 			});
-		case "deepinfra":
+		}
+		case "deepinfra": {
+			const { createDeepInfra } = await import("@ai-sdk/deepinfra");
 			return createDeepInfra({
 				baseURL: config.apiUrl,
 				apiKey: config.apiKey,
 			});
-		case "gemini":
+		}
+		case "gemini": {
+			const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
 			return createOpenAICompatible({
 				name: "gemini",
 				baseURL: config.apiUrl,
@@ -90,7 +99,9 @@ export function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
 					Authorization: `Bearer ${config.apiKey}`,
 				},
 			});
-		case "openrouter":
+		}
+		case "openrouter": {
+			const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
 			return createOpenAICompatible({
 				name: "openrouter",
 				baseURL: config.apiUrl,
@@ -98,7 +109,9 @@ export function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
 					Authorization: `Bearer ${config.apiKey}`,
 				},
 			});
-		case "zai":
+		}
+		case "zai": {
+			const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
 			return createOpenAICompatible({
 				name: "zai",
 				baseURL: config.apiUrl,
@@ -106,7 +119,9 @@ export function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
 					Authorization: `Bearer ${config.apiKey}`,
 				},
 			});
-		case "minimax":
+		}
+		case "minimax": {
+			const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
 			return createOpenAICompatible({
 				name: "minimax",
 				baseURL: config.apiUrl,
@@ -114,7 +129,9 @@ export function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
 					Authorization: `Bearer ${config.apiKey}`,
 				},
 			});
-		case "custom":
+		}
+		case "custom": {
+			const { createOpenAICompatible } = await import("@ai-sdk/openai-compatible");
 			return createOpenAICompatible({
 				name: "custom",
 				baseURL: config.apiUrl,
@@ -122,6 +139,7 @@ export function selectAIProvider(config: { apiUrl: string; apiKey: string }) {
 					Authorization: `Bearer ${config.apiKey}`,
 				},
 			});
+		}
 		default:
 			throw new Error(`Unsupported AI provider: ${providerName}`);
 	}

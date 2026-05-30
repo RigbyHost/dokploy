@@ -234,7 +234,7 @@ export const aiRouter = createTRPCRouter({
 					});
 				}
 
-				const provider = selectAIProvider(aiSettings);
+				const provider = await selectAIProvider(aiSettings);
 				const model = provider(aiSettings.model);
 
 				const contextLabel =
@@ -277,7 +277,7 @@ ${input.logs}`,
 		)
 		.mutation(async ({ input }) => {
 			try {
-				const provider = selectAIProvider({
+				const provider = await selectAIProvider({
 					apiUrl: input.apiUrl,
 					apiKey: input.apiKey,
 				});

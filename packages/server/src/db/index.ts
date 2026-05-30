@@ -21,13 +21,13 @@ let dbConnection: Database;
 
 if (process.env.NODE_ENV === "production") {
 	// En producción no usamos global cache
-	dbConnection = drizzle(postgres(dbUrl), {
+	dbConnection = drizzle(postgres(dbUrl, { max: 5, idle_timeout: 30, prepare: false }), {
 		schema,
 	});
 } else {
 	// En desarrollo reutilizamos conexión para evitar múltiples conexiones
 	if (!globalForDb.db) {
-		globalForDb.db = drizzle(postgres(dbUrl), {
+		globalForDb.db = drizzle(postgres(dbUrl, { max: 3, idle_timeout: 20, prepare: false }), {
 			schema,
 		});
 	}

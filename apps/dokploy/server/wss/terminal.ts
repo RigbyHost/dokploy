@@ -174,8 +174,6 @@ export const setupTerminalWebSocketServer = (
 		}
 
 		const conn = new Client();
-		let _stdout = "";
-		let _stderr = "";
 
 		ws.send("Connecting...\n");
 
@@ -193,11 +191,9 @@ export const setupTerminalWebSocketServer = (
 							conn.end();
 						})
 						.on("data", (data: string) => {
-							_stdout += data.toString();
 							ws.send(data.toString());
 						})
 						.stderr.on("data", (data) => {
-							_stderr += data.toString();
 							ws.send(data.toString());
 							console.error("Error: ", data.toString());
 						});
