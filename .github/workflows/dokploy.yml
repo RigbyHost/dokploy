@@ -5,12 +5,8 @@ on:
     branches: [main]
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  build:
+  build-amd64:
     runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: read
@@ -39,6 +35,59 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/rigbyhost/dokploy:latest
+          tags: ghcr.io/rigbyhost/dokploy:latest-amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  build-arm64:
+    runs-on: blacksmith-4vcpu-ubuntu-2404-arm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare env file
+        run: |
+          cp apps/dokploy/.env.production.example .env.production
+          cp apps/dokploy/.env.production.example apps/dokploy/.env.production
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/rigbyhost/dokploy:latest-arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  merge-manifest:
+    needs: [build-amd64, build-arm64]
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push manifest
+        run: |
+          docker buildx imagetools create -t ghcr.io/rigbyhost/dokploy:latest \
+            ghcr.io/rigbyhost/dokploy:latest-amd64 \
+            ghcr.io/rigbyhost/dokploy:latest-arm64
