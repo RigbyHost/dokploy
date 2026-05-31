@@ -92,7 +92,7 @@ export const suggestVariants = async ({
 			});
 		}
 
-		const provider = selectAIProvider(aiSettings);
+		const provider = await selectAIProvider(aiSettings);
 		const model = provider(aiSettings.model);
 
 		let ip = "";
